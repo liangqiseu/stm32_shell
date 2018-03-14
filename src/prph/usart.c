@@ -33,11 +33,11 @@ int fputc(int ch, FILE *f)
 
 
 
-int USART_SingleCharSend(int ch)
+void USART_SingleCharSend(const char v_ch)
 {
-        while((USART1->SR&0x40)==0);
-        USART1->DR = (u8)ch;
-        return ch;
+        while (0 == (USART1->SR&0x40));
+        USART1->DR = (u8)v_ch;
+        return;
 }
 
 

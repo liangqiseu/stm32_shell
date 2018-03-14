@@ -12,6 +12,7 @@ extern u16 USART_RX_STA;
 void USART_Init(u32 v_pclk2,u32 v_bound);
 
 
+void USART_SingleCharSend(const char v_ch);
 void USART_StringSend(char* v_pDataBuf); 
 #endif	   
 

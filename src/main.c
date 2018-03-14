@@ -1,10 +1,8 @@
-#include <stdio.h>
 #include "sys.h"
 #include "usart.h"		
 #include "delay.h"	
 #include "led.h" 
-
-char* str = "hello world\r\n";
+#include "print.h"
 
 int main(void)
 {		 
@@ -17,9 +15,7 @@ int main(void)
         LED0=1;
         LED1=0;
         SYS_DelayMs(1000);
-	//	printf("hello world!\r\n");
-        //USART_SingleCharSend('a');
-        USART_StringSend(str);
+        USART_Printf("hello world!\r\n");
         LED0=0;
         LED1=1;
         SYS_DelayMs(1000);
