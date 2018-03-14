@@ -6,7 +6,7 @@ OBJCOPY:=arm-none-eabi-objcopy
 INCLUDES:=-I. -I../src/includes
 CFLAG:=--specs=nosys.specs -mcpu=cortex-m3 -mfloat-abi=soft
 ASFLAG:=-mcpu=cortex-m3
-LDFLASG:=-L/optgcc-arm-none-eabi-7-2017-q4-major/lib/gcc/arm-none-eabi/7.2.1
+LDFLAG:=-mcpu=cortex-m3 --specs=nosys.specs 
 
 DIR_SRC:=../src
 DIR_OBJ:=.
@@ -22,7 +22,7 @@ OBJ_O+=$(patsubst %.s,%.o,$(SRC_S))
 
 .PHONY:all clean
 all:$(OBJ_O)
-	$(CC) --specs=nosys.specs -T stm32f10x_flash.ld -o start.elf ./*.o 
+	$(CC) $(LDFLAG) -T stm32f10x_flash.ld -o start.elf ./*.o 
 	$(OBJCOPY) start.elf -Oihex start.hex
 %.o:%.c
 	$(CC) $(INCLUDES) $(CFLAG) -c $< -o $(DIR_OBJ)/$(notdir $@)

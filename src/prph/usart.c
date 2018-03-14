@@ -1,7 +1,9 @@
+/*   std lib     */
+#include <string.h>
+
+/*  stm32 lib*/
 #include "usart.h"	  
  
-
-#if 1
 #pragma import(__use_no_semihosting)             
 struct __FILE 
 { 
@@ -13,12 +15,14 @@ struct __FILE
 /* FILE is typedef¡¯ d in stdio.h. */ 
 FILE __stdout;       
 
-int USART_SingleCharSend(int ch)
+
+int _sys_exit(int x)
 {
-	while((USART1->SR&0x40)==0);
-	USART1->DR = (u8)ch;
-	return 0;
-} 
+    x = x;
+    return 0;
+}
+
+
 
 int fputc(int ch, FILE *f)
 {      
@@ -26,51 +30,71 @@ int fputc(int ch, FILE *f)
 	USART1->DR = (u8)ch;      
 	return ch;
 }
-#endif 
+
+
+
+int USART_SingleCharSend(int ch)
+{
+        while((USART1->SR&0x40)==0);
+        USART1->DR = (u8)ch;
+        return ch;
+}
+
+
+void USART_StringSend(char* v_pDataBuf)
+{
+    u32 index;
+    u32 len = strlen(v_pDataBuf);
+    
+    for(index = 0; index < len; index++)
+    {
+        USART_SingleCharSend(v_pDataBuf[index]);
+    }
+    return;	
+}
+
 
 #if EN_USART1_RX   
-u8 USART_RX_BUF[USART_REC_LEN];     
+u8 USART_RX_BUF[USART_REC_LEN];    
 
 
 u16 USART_RX_STA=0;       
   
 void USART1_IRQHandler(void)
 {
-	u8 res;	
-#ifdef OS_CRITICAL_METHOD 	
-	OSIntEnter();    
-#endif
-	if(USART1->SR&(1<<5))
-	{	 
-		res=USART1->DR; 
-		if((USART_RX_STA&0x8000)==0)
-		{
-			if(USART_RX_STA&0x4000)
-			{
-				if(res!=0x0a)USART_RX_STA=0;
-				else USART_RX_STA|=0x8000;
-			}else 
-			{	
-				if(res==0x0d)USART_RX_STA|=0x4000;
-				else
-				{
-					USART_RX_BUF[USART_RX_STA&0X3FFF]=res;
-					USART_RX_STA++;
-					if(USART_RX_STA>(USART_REC_LEN-1))USART_RX_STA=0;
-				}		 
-			}
-		}  		 									     
-	}
+    u8 res;	
+    if(USART1->SR&(1<<5))
+    {	 
+        res=USART1->DR; 
+        if((USART_RX_STA&0x8000)==0)
+        {
+            if(USART_RX_STA&0x4000)
+            {
+                if(res!=0x0a)USART_RX_STA=0;
+                else USART_RX_STA|=0x8000;
+            }
+            else 
+            {	
+                if(res==0x0d)USART_RX_STA|=0x4000;
+                else
+                {
+                    USART_RX_BUF[USART_RX_STA&0X3FFF]=res;
+                    USART_RX_STA++;
+                    if(USART_RX_STA>(USART_REC_LEN-1))USART_RX_STA=0;
+                }		 
+            }
+        }  		 									     
+    }
 } 
 #endif										 
 
 
-void uart_init(u32 pclk2,u32 bound)
+void USART_Init(u32 v_pclk2,u32 v_bound)
 {  	 
 	float temp;
 	u16 mantissa;
 	u16 fraction;	   
-	temp=(float)(pclk2*1000000)/(bound*16);
+	temp=(float)(v_pclk2*1000000)/(v_bound*16);
 	mantissa=temp;				
 	fraction=(temp-mantissa)*16; 
 	mantissa<<=4;
