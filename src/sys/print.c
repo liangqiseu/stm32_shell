@@ -37,7 +37,10 @@ void printStr(const char *v_str)
 }
 
 
-
+/************************************
+  only support %c %d %s %p
+  others please modify yourself
+************************************/
 void USART_Printf(const char* fmt,...)
 {
     int valInt;
@@ -72,7 +75,21 @@ void USART_Printf(const char* fmt,...)
                     fmt++;
                     break;
                 }
-           
+
+                case 'c':
+                {
+                    valChar = VA_ARG(ap,char);
+                    printCh(valChar);
+                    fmt++;
+                    break;
+                }
+
+                case 'p':
+                {
+                    fmt++;
+                    break;
+                }
+ 
                 default:
                 {
                     USART_SingleCharSend(*fmt);

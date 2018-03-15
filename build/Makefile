@@ -22,7 +22,7 @@ OBJ_O+=$(patsubst %.s,%.o,$(SRC_S))
 
 .PHONY:all clean
 all:$(OBJ_O)
-	$(CC) $(LDFLAG) -T stm32f10x_flash.ld -o start.elf ./*.o 
+	$(CC) $(LDFLAG) -T stm32f10x_flash.ld -o start.elf -Wl,-Map=start.map ./*.o 
 	$(OBJCOPY) start.elf -Oihex start.hex
 %.o:%.c
 	$(CC) $(INCLUDES) $(CFLAG) -c $< -o $(DIR_OBJ)/$(notdir $@)
@@ -31,4 +31,5 @@ all:$(OBJ_O)
 clean:
 	rm *.o
 	rm *.elf
-	
+	rm *.map 
+	rm *.c
