@@ -1,5 +1,11 @@
+#include <stdarg.h>
 #include "usart.h"
 
+
+#define PRINT_MAX_DATA_LENGTH 100
+
+
+#ifdef _NO_LIBC_PRINTF_
 /**These Macro defined in stdarg.h but we make it ourself**/
 typedef char* VA_LIST;
 
@@ -103,3 +109,20 @@ void USART_Printf(const char* fmt,...)
 
     return;
 }
+
+#else
+
+#define USART_Printf(fmt,...) USART_PrintfFunc(const char *fmt,_FUNCTION_,##_VA_ARGS_)
+
+char dataBuf[PRINT_MAX_DATA_LENGTH] = {0};
+void USART_PrintfFunc(const char *fmt,...)
+{
+    va_list ap;
+    va_start(ap,fmt);
+    vsprintf(dataBuf,fmt,ap);
+    USART_StringSend(dataBuf);
+    return;
+}
+
+#endif
+
