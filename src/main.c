@@ -5,13 +5,15 @@
 #include "print.h"
 #include "os_api.h"
 #include "config.h"
+#include "shell.h"
 
-
+/*
 OS_TASK_RETURN_E OS_PrintTask(void)
 {
     USART_Printf("os test!\r\n");
     return OS_TASK_DO_SOMETHING;
 }
+*/
 
 OS_TASK_RETURN_E OS_LedTask(void)
 {
@@ -34,7 +36,7 @@ int main(void)
     OS_Init();
 
 
-    printTaskId = OS_CreateTask(OS_PrintTask,"OS_PrintTask");
+    printTaskId = OS_CreateTask(OS_ShellTask,"OS_ShellTask");
     ledTaskId = OS_CreateTask(OS_LedTask,"OS_LedTask");
 
     OS_Schedule();

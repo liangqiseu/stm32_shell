@@ -30,7 +30,7 @@ all:$(OBJ_O)
 %.o:%.s
 	$(ASM) $(ASFLAG) -c $< -o $(DIR_OBJ)/$(notdir $@)
 clean:
-	rm *.o
-	rm *.elf
-	rm *.map 
-	rm *.c
+	rm -f *.o
+	rm -f *.elf
+	rm -f *.map 
+	rm -f *.c

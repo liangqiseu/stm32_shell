@@ -53,40 +53,31 @@ void USART_StringSend(char* v_pDataBuf)
     return;	
 }
 
+//data receive buffer ,max len is 200
+u8 g_usartRevBuf[USART_REV_LEN];    
+u16 g_usartRevBufRdIdx = 0;
+u16 g_usartRevBufWrIdx = 0;
 
-#if EN_USART1_RX   
-u8 USART_RX_BUF[USART_REC_LEN];    
-
-
+/*
+	a simple customized usart protocol:
+	1) string received by stm32  must end with enter key whose assic code is 0x0d0a
+	2) if receive done,  set USART_RX_STA's bit15 to 1
+	3) others will be regarded as receive fail and data buffer will be cleared to zero
+*/
 u16 USART_RX_STA=0;       
   
 void USART1_IRQHandler(void)
 {
-    u8 res;	
+	u8 revChar;
     if(USART1->SR&(1<<5))
     {	 
-        res=USART1->DR; 
-        if((USART_RX_STA&0x8000)==0)
-        {
-            if(USART_RX_STA&0x4000)
-            {
-                if(res!=0x0a)USART_RX_STA=0;
-                else USART_RX_STA|=0x8000;
-            }
-            else 
-            {	
-                if(res==0x0d)USART_RX_STA|=0x4000;
-                else
-                {
-                    USART_RX_BUF[USART_RX_STA&0X3FFF]=res;
-                    USART_RX_STA++;
-                    if(USART_RX_STA>(USART_REC_LEN-1))USART_RX_STA=0;
-                }		 
-            }
-        }  		 									     
+        revChar=USART1->DR; 
+		g_usartRevBuf[g_usartRevBufWrIdx] = revChar;
+		g_usartRevBufWrIdx = (g_usartRevBufWrIdx+1) % USART_REV_LEN;
+//		USART_SingleCharSend(revChar);
     }
+	return;
 } 
-#endif										 
 
 
 void USART_Init(u32 v_pclk2,u32 v_bound)
