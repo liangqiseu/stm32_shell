@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include <unwind.h> // GCC's internal unwinder, part of libgcc
 #include "usart.h"
 
 
@@ -122,6 +123,29 @@ void USART_PrintfFunc(const char *fmt,...)
     vsprintf(dataBuf,fmt,ap);
     USART_StringSend(dataBuf);
     return;
+}
+
+
+_Unwind_Reason_Code trace_fcn(_Unwind_Context *ctx, void *d)
+{
+    int *depth = (int*)d;
+    USART_PrintfFunc("\t#%d: program counter at 0x%x\r\n", *depth, _Unwind_GetIP(ctx));
+    (*depth)++;
+    return _URC_NO_REASON;
+}
+
+
+
+/*
+	arm-none-eabi not support <execinfo.h>, so I copy an alternative procedure from StackFlow, 
+	uh... it can't display the function name and only shows address. I know it is ugly but Just a moment please!
+*/
+void DEBUG_CallTrace(void)
+{
+    int depth = 0;
+	USART_PrintfFunc("\r\n\t CallTrace info:\r\n");
+    _Unwind_Backtrace(&trace_fcn, &depth);
+	return;
 }
 
 #endif

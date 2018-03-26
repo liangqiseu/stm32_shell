@@ -19,7 +19,8 @@ OS_TASK_RETURN_E OS_LedTask(void)
 {
     LED0 = ~LED0;
     LED1 = ~LED1;
-    SYS_DelayMs(1000);
+    SYS_DelayMs(3000);
+//	DEBUG_CallTrace();
     return OS_TASK_DO_SOMETHING;
 }
 

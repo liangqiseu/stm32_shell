@@ -4,6 +4,7 @@
 #include "os_api.h"
 
 #define SHELL_CMD_CHAR_MAX 50
+#define SHELL_PROMPT "XiaoOS#"
 
 OS_TASK_RETURN_E OS_ShellTask(void)
 {
@@ -36,7 +37,8 @@ OS_TASK_RETURN_E OS_ShellTask(void)
 			g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1)%USART_REV_LEN;
 		}
 
-		USART_Printf("%s",oneCmd);
+		USART_PrintfFunc("%s",oneCmd);
+		USART_PrintfFunc(SHELL_PROMPT);
 	
 		return OS_TASK_DO_SOMETHING;
 	}
