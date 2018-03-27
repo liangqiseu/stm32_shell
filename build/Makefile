@@ -2,6 +2,7 @@ CC:=arm-none-eabi-gcc
 ASM:=arm-none-eabi-as
 LD:=arm-none-eabi-ld
 OBJCOPY:=arm-none-eabi-objcopy
+OBJDUMP:=arm-none-eabi-objdump
 TCL:=tclsh8.6
 
 
@@ -26,21 +27,28 @@ SRC_S:=$(wildcard $(DIR_SRC)/boot/*.s)
 OBJ_O:=$(patsubst %.c,%.o,$(SRC_C))
 OBJ_O+=$(patsubst %.s,%.o,$(SRC_S))
 
+OUTFILE:=start
+
 .PHONY:all clean
 all:$(OBJ_O)
-	$(CC) $(LDFLAG) -T stm32f10x_flash.ld -o start.elf -Wl,-Map=start.map ./*.o
-#	$(TCL) exportSymbol.tcl
-#	mv symbol.c  $(DIR_SYMBOL_C)
-#	$(CC) $(INCLUDES) $(CFLAG) -c $(DIR_SYMBOL_C)/symbol.c -o $(DIR_OBJ)/symbol.o
-#	$(CC) $(LDFLAG) -T stm32f10x_flash.ld -o start.elf -Wl,-Map=start.map ./*.o
+	$(CC) $(LDFLAG) -T stm32f10x_flash.ld -o $(OUTFILE).elf -Wl,-Map=$(OUTFILE).map ./*.o
+	$(TCL) exportSymbol.tcl
+	mv symbol.c  $(DIR_SYMBOL_C)
+	$(CC) $(INCLUDES) $(CFLAG) -c $(DIR_SYMBOL_C)/symbol.c -o $(DIR_OBJ)/symbol.o
+	$(CC) $(LDFLAG) -T stm32f10x_flash.ld -o $(OUTFILE).elf -Wl,-Map=start.map ./*.o
 	
-	$(OBJCOPY) start.elf -Oihex start.hex
+	$(OBJCOPY) $(OUTFILE).elf -Oihex $(OUTFILE).hex
 %.o:%.c
 	$(CC) $(INCLUDES) $(CFLAG) -c $< -o $(DIR_OBJ)/$(notdir $@)
 %.o:%.s
 	$(ASM) $(ASFLAG) -c $< -o $(DIR_OBJ)/$(notdir $@)
+
+asm:
+	$(OBJDUMP) -D $(OUTFILE).elf > $(OUTFILE).asm
+
 clean:
 	rm -f *.o
 	rm -f *.elf
 	rm -f *.map 
 	rm -f $(DIR_SYMBOL_C)/symbol.c
+	rm -f *.asm

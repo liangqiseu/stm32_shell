@@ -50,46 +50,49 @@ proc buildSymTcl::creatSymTcl {} {
 			[DR] {
 				puts $buildSymTcl::fdOut "extern int $name;"
 				lappend symTblList "	\{\
-									NULL,\
+									0,\
 									\"$name\",\
 									(char*)\&$name,\
-									0x$size,$type,0,0,\
+									0x$size,0,0,\
 									SYMBOL_GLOBAL | SYMBOL_DATA\
-									\}"
+									\},"
 			}
 
 			
 			[BC] {
 				puts $buildSymTcl::fdOut "extern int $name;"
 				lappend symTblList "	\{\
-									NULL,\
+									0,\
 									\"$name\",\
 									(char*)\&$name, \
-									0x$size,$type,0,0,\
+									0x$size,0,0,\
 									SYMBOL_GLOBAL | SYMBOL_BSS\
-									\}"
+									\},"
 			}
 
 			[A] {
-				puts $buildSymTcl::fdOut "extern int $name ();"
+				puts $buildSymTcl::fdOut "extern int $name;"
 				lappend symTblList "	\{\
-									NULL,\
+									0,\
 									\"$name\",\
 									(char*) \&$name,\
-									0x$size,$type,0,0,\
+									0x$size,0,0,\
 									SYMBOL_GLOBAL | SYMBOL_ABS\
-									\}"
+									\},"
 			}
 
-			[TVW] {
+			[TVW] {		
+				if [regexp {^[a-z]*} $name]	{
+					continue
+				}	
 				puts $buildSymTcl::fdOut "extern int $name ();"
 				lappend symTblList "	\{\
-									NULL,\
+									0,\
 									\"$name\",\
 									(char*) $name,\
-									0x$size,$type,0,0\
+									0x$size,0,0,\
 									SYMBOL_GLOBAL | SYMBOL_TEXT\
-									\}"
+									\},"
 			}
 
 
@@ -113,7 +116,7 @@ proc buildSymTcl::creatSymTcl {} {
 	foreach symbolTblEntry $symTblListSorted {
 		puts $buildSymTcl::fdOut $symbolTblEntry			
 	}
-	puts $buildSymTcl::fdOut "\}"
+	puts $buildSymTcl::fdOut "\};"
 
 	return 0
 }
@@ -124,7 +127,11 @@ puts $buildSymTcl::fdOut "/********************************/"
 puts $buildSymTcl::fdOut "/* filename:symbol.c*/"
 puts $buildSymTcl::fdOut "/* creat time: [clock format [clock seconds]] */"
 puts $buildSymTcl::fdOut "/********************************/"
-puts $buildSymTcl::fdOut "#include \"shell.h\""
+#puts $buildSymTcl::fdOut "#include <stddef.h>"
+puts $buildSymTcl::fdOut "#include \"symbol_api.h\""
+
+
+
 
 set ret [buildSymTcl::creatSymTcl]
 
