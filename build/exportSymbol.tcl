@@ -109,6 +109,7 @@ proc buildSymTcl::creatSymTcl {} {
 	set len [llength $symTblList]
 	set symTblListSorted [lsort $symTblList]	
 
+	puts $buildSymTcl::fdOut "unsigned int g_symTblLen = $len;"
 	puts $buildSymTcl::fdOut ""
 	puts $buildSymTcl::fdOut "SYMBOL_TABAL_S symTbl\[$len\] = "
 	puts $buildSymTcl::fdOut "\{"
@@ -127,7 +128,6 @@ puts $buildSymTcl::fdOut "/********************************/"
 puts $buildSymTcl::fdOut "/* filename:symbol.c*/"
 puts $buildSymTcl::fdOut "/* creat time: [clock format [clock seconds]] */"
 puts $buildSymTcl::fdOut "/********************************/"
-#puts $buildSymTcl::fdOut "#include <stddef.h>"
 puts $buildSymTcl::fdOut "#include \"symbol_api.h\""
 
 
