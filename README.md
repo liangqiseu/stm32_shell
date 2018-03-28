@@ -6,6 +6,10 @@ or execute a function manually. And for that, it relates to symbol table and i w
 2. make 
 3. download the hex file to stm32 board
 
+# 2018.3.28 update
+1. add a tcl script to export all symbols from elf file and automatically create a symbol.c file which will 
+   be used in shell function in feature.
+
 # 2018.3.18 update：
 1. Add USART function and make a customized printf function;
 2. Add a simple OS which can realize fundamental schedule;
