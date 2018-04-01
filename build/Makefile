@@ -20,8 +20,8 @@ SRC_C+=$(wildcard $(DIR_SRC)/boot/*.c)
 SRC_C+=$(wildcard $(DIR_SRC)/sys/*.c)
 SRC_C+=$(wildcard $(DIR_SRC)/prph/*.c)
 SRC_C+=$(wildcard $(DIR_SRC)/os/*.c)
+SRC_C+=$(wildcard $(DIR_SRC)/shell/*.c)
 SRC_S:=$(wildcard $(DIR_SRC)/boot/*.s)
-
 
 
 OBJ_O:=$(patsubst %.c,%.o,$(SRC_C))

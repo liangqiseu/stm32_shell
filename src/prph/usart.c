@@ -1,37 +1,7 @@
 /*   std lib     */
-#include <string.h>
 
 /*  stm32 lib*/
 #include "usart.h"	  
- 
-#pragma import(__use_no_semihosting)             
-struct __FILE 
-{ 
-	int handle; 
-	/* Whatever you require here. If the only file you are using is */ 
-	/* standard output using printf() for debugging, no file handling */ 
-	/* is required. */ 
-}; 
-/* FILE is typedef¡¯ d in stdio.h. */ 
-FILE __stdout;       
-
-
-int _sys_exit(int x)
-{
-    x = x;
-    return 0;
-}
-
-
-
-int fputc(int ch, FILE *f)
-{      
-	while((USART1->SR&0X40)==0);
-	USART1->DR = (u8)ch;      
-	return ch;
-}
-
-
 
 void USART_SingleCharSend(const char v_ch)
 {
@@ -43,13 +13,12 @@ void USART_SingleCharSend(const char v_ch)
 
 void USART_StringSend(char* v_pDataBuf)
 {
-    u32 index;
-    u32 len = strlen(v_pDataBuf);
-    
-    for(index = 0; index < len; index++)
-    {
-        USART_SingleCharSend(v_pDataBuf[index]);
-    }
+	while('\0' != *v_pDataBuf)
+	{
+		USART_SingleCharSend(*v_pDataBuf);
+		v_pDataBuf++;
+	}
+
     return;	
 }
 
@@ -100,10 +69,8 @@ void USART_Init(u32 v_pclk2,u32 v_bound)
 	
  	USART1->BRR=mantissa; 
 	USART1->CR1|=0X200C;  
-#if EN_USART1_RX		 
 	USART1->CR1|=1<<8;    
 	USART1->CR1|=1<<5;  
 	MY_NVIC_Init(3,3,USART1_IRQn,2);
-#endif
 
 }
