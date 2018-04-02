@@ -31,7 +31,7 @@ OUTFILE:=start
 
 .PHONY:all clean
 all:$(OBJ_O)
-	$(CC) $(LDFLAG) -T stm32f10x_flash.ld -o $(OUTFILE).elf -Wl,-Map=$(OUTFILE).map ./*.o
+	$(CC) $(LDFLAG) -shared -o $(OUTFILE).elf -Wl,-Map=$(OUTFILE).map ./*.o
 	$(TCL) exportSymbol.tcl
 	mv symbol.c  $(DIR_SYMBOL_C)
 	$(CC) $(INCLUDES) $(CFLAG) -c $(DIR_SYMBOL_C)/symbol.c -o $(DIR_OBJ)/symbol.o
