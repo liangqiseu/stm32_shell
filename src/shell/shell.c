@@ -58,37 +58,59 @@ s32 SHELL_GetAddrByName(const char *v_pName)
 
 OS_TASK_RETURN_E OS_ShellTask(void)
 {
-	u32 cnt = 0;
-	char oneCmd[SHELL_CMD_CHAR_MAX] = {0};
+	static u32 cnt = 0;
+	static u8 revDoneFlag = FALSE;
+	static char oneCmd[SHELL_CMD_CHAR_MAX] = {0};
 	if (g_usartRevBufWrIdx != g_usartRevBufRdIdx)
 	{
 		while (TRUE)
 		{
-			if ((g_usartRevBuf[g_usartRevBufRdIdx]==0x0d) && (g_usartRevBuf[(g_usartRevBufRdIdx+1)%USART_REV_LEN]==0x0a))
+			if (g_usartRevBuf[g_usartRevBufRdIdx]==0x0d)
 			{
-				g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1) % USART_REV_LEN;
-				g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1) % USART_REV_LEN;
-				oneCmd[cnt] = 0x0d;
-				oneCmd[cnt+1] = 0x0a;
-				oneCmd[cnt+2] = '\0';
-				break;
+				if (0x0a == (g_usartRevBuf[(g_usartRevBufRdIdx+1)%USART_REV_LEN]))
+				{
+					g_usartRevBuf[g_usartRevBufRdIdx] = '\0';
+					g_usartRevBuf[(g_usartRevBufRdIdx+1)%USART_REV_LEN] = '\0';
+					g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1) % USART_REV_LEN;
+					g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1) % USART_REV_LEN;
+					//oneCmd[cnt] = 0x0d;
+					//oneCmd[cnt+1] = 0x0a;
+					oneCmd[cnt] = '\0';
+					revDoneFlag = TRUE;
+					break;
+				}
+				else
+				{
+					g_usartRevBuf[g_usartRevBufRdIdx] = '\0';
+					g_usartRevBufRdIdx = (g_usartRevBufRdIdx + 1) % USART_REV_LEN;
+					oneCmd[cnt] = '\0';
+					revDoneFlag = TRUE;
+				}
 			}
+
 
 			oneCmd[cnt] = g_usartRevBuf[g_usartRevBufRdIdx];
 	
 			if (cnt == (SHELL_CMD_CHAR_MAX-3))
 			{
-				oneCmd[cnt] = 0x0d;
-				oneCmd[cnt+1] = 0x0a;
-				oneCmd[cnt+2] = '\0';
+				//oneCmd[cnt] = 0x0d;
+				//oneCmd[cnt+1] = 0x0a;
+				oneCmd[cnt] = '\0';
+				revDoneFlag = TRUE;
 				break;
 			}
 			cnt++;
-			g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1)%USART_REV_LEN;
+			g_usartRevBufRdIdx = (g_usartRevBufRdIdx + 1) % USART_REV_LEN;
 		}
-
-		USART_PrintfFunc("%s",oneCmd);
-		USART_PrintfFunc(SHELL_PROMPT);
+		
+		if (TRUE == revDoneFlag)
+		{
+			USART_PrintfFunc("%d %d\r\n",g_usartRevBufRdIdx,g_usartRevBufWrIdx);
+			USART_PrintfFunc("%s\r\n",oneCmd);
+			USART_PrintfFunc(SHELL_PROMPT);
+			cnt = 0;
+			revDoneFlag = FALSE;
+		}
 	
 		return OS_TASK_DO_SOMETHING;
 	}
