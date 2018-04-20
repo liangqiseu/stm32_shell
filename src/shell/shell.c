@@ -55,9 +55,14 @@ s32 SHELL_GetAddrByName(const char *v_pName)
 }
 
 
-
-void SHELL_GetOneCmd(void)
+/*
+	retValue: 
+		0 -- receive no cmd
+		n -- receive one cmd with length n
+*/
+u8 SHELL_GetOneCmd(char *v_pCmd)
 {
+	u8 retLength = 0;
 	static u8 cnt = 0;
 	static u8 revDoneFlag = FALSE;
 	static char oneCmd[SHELL_CMD_CHAR_MAX] = { 0 };
@@ -73,6 +78,7 @@ void SHELL_GetOneCmd(void)
 				g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1) % USART_REV_LEN;
 				g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1) % USART_REV_LEN;
 				oneCmd[cnt] = '\0';
+				cnt++;
 				revDoneFlag = TRUE;
 				break;
 			}
@@ -81,6 +87,7 @@ void SHELL_GetOneCmd(void)
 				g_usartRevBuf[g_usartRevBufRdIdx] = '\0';
 				g_usartRevBufRdIdx = (g_usartRevBufRdIdx + 1) % USART_REV_LEN;
 				oneCmd[cnt] = '\0';
+				cnt++;
 				revDoneFlag = TRUE;
 				break;
 			}
@@ -92,6 +99,7 @@ void SHELL_GetOneCmd(void)
 		if (cnt == (SHELL_CMD_CHAR_MAX-3))
 		{
 			oneCmd[cnt] = '\0';
+			cnt++;
 			revDoneFlag = TRUE;
 			break;
 		}
@@ -104,17 +112,21 @@ void SHELL_GetOneCmd(void)
 		if ('\0' == oneCmd[0])
 		{
 			USART_PrintfFunc("%s\r\n",oneCmd);
+			USART_PrintfFunc(SHELL_PROMPT);
 		}
 		else
 		{
 			USART_PrintfFunc("\r\n%s\r\n",oneCmd);
+			(void)strcpy(v_pCmd,oneCmd);
 		}
-		USART_PrintfFunc(SHELL_PROMPT);
+
+		retLength = cnt - 1;
 		cnt = 0;
 		revDoneFlag = FALSE;
+		
 	}
-	
-	return;
+
+	return retLength;
 }
 
 /*
@@ -122,7 +134,24 @@ void SHELL_GetOneCmd(void)
 */
 OS_TASK_RETURN_E OS_ShellTask(void)
 {
-	SHELL_GetOneCmd();
+	s32 cmdIndex = 0;
+	char oneCmd[SHELL_CMD_CHAR_MAX] = { 0 };
+
+	if (0 == SHELL_GetOneCmd(oneCmd))
+	{
+		return OS_TASK_DO_NOTHING;
+	}
+	else
+	{
+		USART_PrintfFunc("%s\r\n",oneCmd);
+		cmdIndex = SHELL_GetAddrByName(oneCmd);
+		if (0 <= cmdIndex)
+		{
+			USART_PrintfFunc("%d %d\r\n",cmdIndex,*(u32*)(symTbl[cmdIndex].addr));
+			USART_PrintfFunc(SHELL_PROMPT);
+			
+		}
+	}
 	return OS_TASK_DO_SOMETHING;
 }
 
