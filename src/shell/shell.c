@@ -9,7 +9,7 @@
 #include "os_api.h"
 
 #define SHELL_CMD_CHAR_MAX 50
-#define SHELL_PROMPT "XiaoOS#"
+#define SHELL_PROMPT "XiaoOS# "
 
 extern SYMBOL_TABAL_S symTbl[];
 extern unsigned g_symTblLen;
@@ -56,65 +56,73 @@ s32 SHELL_GetAddrByName(const char *v_pName)
 
 
 
-OS_TASK_RETURN_E OS_ShellTask(void)
+void SHELL_GetOneCmd(void)
 {
-	static u32 cnt = 0;
+	static u8 cnt = 0;
 	static u8 revDoneFlag = FALSE;
-	static char oneCmd[SHELL_CMD_CHAR_MAX] = {0};
-	if (g_usartRevBufWrIdx != g_usartRevBufRdIdx)
+	static char oneCmd[SHELL_CMD_CHAR_MAX] = { 0 };
+
+	while (g_usartRevBufWrIdx != g_usartRevBufRdIdx)
 	{
-		while (TRUE)
+		if (0x0d == g_usartRevBuf[g_usartRevBufRdIdx])
 		{
-			if (g_usartRevBuf[g_usartRevBufRdIdx]==0x0d)
+			if (0x0a == (g_usartRevBuf[(g_usartRevBufRdIdx+1)%USART_REV_LEN]))
 			{
-				if (0x0a == (g_usartRevBuf[(g_usartRevBufRdIdx+1)%USART_REV_LEN]))
-				{
-					g_usartRevBuf[g_usartRevBufRdIdx] = '\0';
-					g_usartRevBuf[(g_usartRevBufRdIdx+1)%USART_REV_LEN] = '\0';
-					g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1) % USART_REV_LEN;
-					g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1) % USART_REV_LEN;
-					//oneCmd[cnt] = 0x0d;
-					//oneCmd[cnt+1] = 0x0a;
-					oneCmd[cnt] = '\0';
-					revDoneFlag = TRUE;
-					break;
-				}
-				else
-				{
-					g_usartRevBuf[g_usartRevBufRdIdx] = '\0';
-					g_usartRevBufRdIdx = (g_usartRevBufRdIdx + 1) % USART_REV_LEN;
-					oneCmd[cnt] = '\0';
-					revDoneFlag = TRUE;
-				}
-			}
-
-
-			oneCmd[cnt] = g_usartRevBuf[g_usartRevBufRdIdx];
-	
-			if (cnt == (SHELL_CMD_CHAR_MAX-3))
-			{
-				//oneCmd[cnt] = 0x0d;
-				//oneCmd[cnt+1] = 0x0a;
+				g_usartRevBuf[g_usartRevBufRdIdx] = '\0';
+				g_usartRevBuf[(g_usartRevBufRdIdx+1)%USART_REV_LEN] = '\0';
+				g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1) % USART_REV_LEN;
+				g_usartRevBufRdIdx = (g_usartRevBufRdIdx+1) % USART_REV_LEN;
 				oneCmd[cnt] = '\0';
 				revDoneFlag = TRUE;
 				break;
 			}
-			cnt++;
-			g_usartRevBufRdIdx = (g_usartRevBufRdIdx + 1) % USART_REV_LEN;
+			else
+			{
+				g_usartRevBuf[g_usartRevBufRdIdx] = '\0';
+				g_usartRevBufRdIdx = (g_usartRevBufRdIdx + 1) % USART_REV_LEN;
+				oneCmd[cnt] = '\0';
+				revDoneFlag = TRUE;
+				break;
+			}
 		}
-		
-		if (TRUE == revDoneFlag)
-		{
-			USART_PrintfFunc("%d %d\r\n",g_usartRevBufRdIdx,g_usartRevBufWrIdx);
-			USART_PrintfFunc("%s\r\n",oneCmd);
-			USART_PrintfFunc(SHELL_PROMPT);
-			cnt = 0;
-			revDoneFlag = FALSE;
-		}
-	
-		return OS_TASK_DO_SOMETHING;
-	}
 
+
+		oneCmd[cnt] = g_usartRevBuf[g_usartRevBufRdIdx];
+
+		if (cnt == (SHELL_CMD_CHAR_MAX-3))
+		{
+			oneCmd[cnt] = '\0';
+			revDoneFlag = TRUE;
+			break;
+		}
+		cnt++;
+		g_usartRevBufRdIdx = (g_usartRevBufRdIdx + 1) % USART_REV_LEN;
+	}
+		
+	if (TRUE == revDoneFlag)
+	{
+		if ('\0' == oneCmd[0])
+		{
+			USART_PrintfFunc("%s\r\n",oneCmd);
+		}
+		else
+		{
+			USART_PrintfFunc("\r\n%s\r\n",oneCmd);
+		}
+		USART_PrintfFunc(SHELL_PROMPT);
+		cnt = 0;
+		revDoneFlag = FALSE;
+	}
+	
+	return;
 }
 
+/*
+	OS_ShellTask: called by OS , build-in task, created by OS init.
+*/
+OS_TASK_RETURN_E OS_ShellTask(void)
+{
+	SHELL_GetOneCmd();
+	return OS_TASK_DO_SOMETHING;
+}
 
