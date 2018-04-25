@@ -75,7 +75,7 @@ proc buildSymTcl::creatSymTcl {} {
 				lappend symTblList "	\{\
 									0,\
 									\"$name\",\
-									(char*) \&$name,\
+									(char*)\&$name,\
 									0x$size,0,0,\
 									SYMBOL_GLOBAL | SYMBOL_ABS\
 									\},"
@@ -87,7 +87,7 @@ proc buildSymTcl::creatSymTcl {} {
 					lappend symTblList "	\{\
 										0,\
 										\"$name\",\
-										(char*) $name,\
+										(char*)$name,\
 										0x$size,0,0,\
 										SYMBOL_GLOBAL | SYMBOL_TEXT\
 										\},"
