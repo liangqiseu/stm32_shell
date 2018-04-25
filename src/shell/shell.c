@@ -14,10 +14,6 @@
 extern SYMBOL_TABAL_S symTbl[];
 extern unsigned g_symTblLen;
 
-void SHELL_ExecOneCmd(void *v_pCmdPara)
-{
-	return;
-} 
 
 
 /*
@@ -52,6 +48,34 @@ s32 SHELL_GetAddrByName(const char *v_pName)
 	}
 
 	return SHELL_CMD_NOT_FIND;
+}
+
+
+
+u32 SHELL_cmdIsFunction(SYMBOL_TABAL_S *v_pSymbolInfo)
+{
+	if ((SYMBOL_GLOBAL | SYMBOL_TEXT) == v_pSymbolInfo->type)
+	{
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+
+u32 SHELL_cmdIsGlobalValue(SYMBOL_TABAL_S *v_pSymbolInfo)
+{
+	if ((SYMBOL_GLOBAL | SYMBOL_BSS) == v_pSymbolInfo->type)
+	{
+		return TRUE;
+	}
+
+	if ((SYMBOL_GLOBAL | SYMBOL_DATA) == v_pSymbolInfo->type)
+	{
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 
@@ -116,7 +140,7 @@ u8 SHELL_GetOneCmd(char *v_pCmd)
 		}
 		else
 		{
-			USART_PrintfFunc("\r\n%s\r\n",oneCmd);
+			//USART_PrintfFunc("\r\n%s\r\n",oneCmd);
 			(void)strcpy(v_pCmd,oneCmd);
 		}
 
@@ -129,29 +153,64 @@ u8 SHELL_GetOneCmd(char *v_pCmd)
 	return retLength;
 }
 
-/*
-	OS_ShellTask: called by OS , build-in task, created by OS init.
-*/
-OS_TASK_RETURN_E OS_ShellTask(void)
+
+void SHELL_ExecOneCmd(char *v_pCmdName)
 {
 	s32 cmdIndex = 0;
+	
+	USART_PrintfFunc("%s\r\n",v_pCmdName);
+	cmdIndex = SHELL_GetAddrByName(v_pCmdName);
+	if (0 <= cmdIndex)
+	{
+		
+		//USART_PrintfFunc("%d %d\r\n",cmdIndex,*(u32*)(symTbl[cmdIndex].addr));
+		if (TRUE == SHELL_cmdIsGlobalValue(&symTbl[cmdIndex]))
+		{
+			USART_PrintfFunc("%s: addr=0x%x value=0x%x\r\n",
+							v_pCmdName,
+							(void*)symTbl[cmdIndex].addr,
+							*(u32*)(symTbl[cmdIndex].addr));
+		}
+		else if (TRUE == SHELL_cmdIsFunction(&symTbl[cmdIndex]))
+		{
+			USART_PrintfFunc("%s: addr=0x%x \r\n",
+							v_pCmdName,
+							(void*)symTbl[cmdIndex].addr);
+		}
+		else
+		{
+			USART_PrintfFunc("%s\r\n",v_pCmdName);
+		}
+	
+	}
+	else
+	{
+		USART_PrintfFunc("%s is not a valid cmd!\r\n",v_pCmdName);
+	}
+
+	USART_PrintfFunc(SHELL_PROMPT); 
+
+	return;
+} 
+
+
+
+/*
+	SHELL_CmdHandle: called by shell task
+*/
+void SHELL_CmdHandle(void)
+{
 	char oneCmd[SHELL_CMD_CHAR_MAX] = { 0 };
 
 	if (0 == SHELL_GetOneCmd(oneCmd))
 	{
-		return OS_TASK_DO_NOTHING;
+		return;
 	}
 	else
 	{
-		USART_PrintfFunc("%s\r\n",oneCmd);
-		cmdIndex = SHELL_GetAddrByName(oneCmd);
-		if (0 <= cmdIndex)
-		{
-			USART_PrintfFunc("%d %d\r\n",cmdIndex,*(u32*)(symTbl[cmdIndex].addr));
-			USART_PrintfFunc(SHELL_PROMPT);
-			
-		}
+		//USART_PrintfFunc("%s\r\n",oneCmd);
+		SHELL_ExecOneCmd(oneCmd);
 	}
-	return OS_TASK_DO_SOMETHING;
+	return;
 }
 

@@ -82,17 +82,17 @@ proc buildSymTcl::creatSymTcl {} {
 			}
 
 			[TVW] {		
-				if [regexp {^[a-z]*} $name]	{
-					continue
+				if [regexp {^[A-Z]*_.*} $name] {
+					puts $buildSymTcl::fdOut "extern int $name ();"
+					lappend symTblList "	\{\
+										0,\
+										\"$name\",\
+										(char*) $name,\
+										0x$size,0,0,\
+										SYMBOL_GLOBAL | SYMBOL_TEXT\
+										\},"
+	
 				}	
-				puts $buildSymTcl::fdOut "extern int $name ();"
-				lappend symTblList "	\{\
-									0,\
-									\"$name\",\
-									(char*) $name,\
-									0x$size,0,0,\
-									SYMBOL_GLOBAL | SYMBOL_TEXT\
-									\},"
 			}
 
 

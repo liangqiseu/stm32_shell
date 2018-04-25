@@ -28,7 +28,6 @@ int main(void)
 {	
     int a = 0;	 
     u32 ledTaskId = 0;
-    u32 printTaskId = 0;
 
     Stm32_Clock_Init(9); 	
     SYS_DelayInit(72);	     	
@@ -36,8 +35,6 @@ int main(void)
     USART_Init(72,9600);
     OS_Init();
 
-
-    printTaskId = OS_CreateTask(OS_ShellTask,"OS_ShellTask");
     ledTaskId = OS_CreateTask(OS_LedTask,"OS_LedTask");
 
     OS_Schedule();

@@ -10,12 +10,14 @@
 #include "os_api.h"
 #include "config.h"
 #include "list_api.h"
+#include "shell.h"
 
 OS_SCHEDULE_CTRL_S g_osScheduleCtrl;
 
 static u32 g_osTaskIdIndex = 0;
 
 u32 g_osIdleTaskId = 0;
+u32 g_osShellTaskId = 0;
 u32 g_osMsgHandleTaskId = 0;
 
 LIST_HEAD* g_pOsMsgSendList = NULL;
@@ -50,6 +52,19 @@ OS_TASK_RETURN_E OS_IdleTask(void)
 	return 	OS_TASK_DO_SOMETHING;
 }
 
+
+/*
+	build-in task, created by OS init.
+*/
+OS_TASK_RETURN_E OS_ShellTask(void)
+{
+	SHELL_CmdHandle();
+	return OS_TASK_DO_SOMETHING;
+}
+
+
+
+
 OS_TASK_RETURN_E OS_MsgHandleTask(void)
 {
 	LIST_NODE_S *lastNode;
@@ -78,7 +93,6 @@ u32 OS_CreateTask(OS_TASK_FUNCTION v_fun, char* v_name)
 	g_osScheduleCtrl.taskinfo[g_osTaskIdIndex].weight = 1;  //默认权重是1
 	g_osScheduleCtrl.taskinfo[g_osTaskIdIndex].regFlag = TRUE;
 
-	/*配置全局调度结构的bitmap*/
 	/*
 	g_osTaskReadyGroup |= g_osTaskReadMap[v_taskId >> 3];
 	g_osTaskBitmap[v_taskId >> 3] |= g_osTaskReadMap[v_taskId & 0x7];
@@ -97,6 +111,7 @@ void OS_Init(void)
 	(void)memset(&g_osScheduleCtrl, 0, sizeof(g_osScheduleCtrl));
 	g_osIdleTaskId = OS_CreateTask(OS_IdleTask, "OS_IdleTask");
 	g_osMsgHandleTaskId = OS_CreateTask(OS_MsgHandleTask, "OS_IdleTask");
+    g_osShellTaskId = OS_CreateTask(OS_ShellTask,"OS_ShellTask");
 
 	g_pOsMsgSendList = OS_ListCreate();
 	return;
