@@ -155,11 +155,62 @@ u8 SHELL_GetOneCmd(char *v_pCmd)
 }
 
 
+void SHELL_CmdParse(u32 cmdIdx, SHELL_CMD_S *v_cmdInfo)
+{
+	SYMBOL_TABAL_S *symbolInfo = &symTbl[cmdIdx];
+	if (TRUE == SHELL_cmdIsGlobalValue(symbolInfo))
+	{
+		v_cmdInfo->cmdType = SHELL_CMD_GLOBAL_VALUE;
+		v_cmdInfo->cmdAddr = symbolInfo->addr;
+
+	}
+	else if (TRUE == SHELL_cmdIsFunction(symbolInfo))
+	{
+		v_cmdInfo->cmdType = SHELL_CMD_FUNCTION;
+		v_cmdInfo->cmdAddr = symbolInfo->addr;
+	}
+	else
+	{
+		USART_PrintfFunc("\r\ncmdIdx=0x%x %s is what?\r\n",cmdIdx,symbolInfo->name);
+	}
+}
+
+
+void SHELL_CmdExec(char *v_pCmdName,SHELL_CMD_S *v_cmdInfo)
+{
+	s32 fnRet = 0; 
+	SHELL_FUN fn = NULL;
+	
+	if (SHELL_CMD_GLOBAL_VALUE == v_cmdInfo->cmdType)
+	{
+		USART_PrintfFunc("\r\n%s: addr=0x%x value=0x%x\r\n",
+						v_pCmdName,
+						(void*)v_cmdInfo->cmdAddr,
+						*(u32*)v_cmdInfo->cmdAddr);
+
+	}
+
+	if (SHELL_CMD_FUNCTION == v_cmdInfo->cmdType)
+	{
+		fn = (SHELL_FUN)v_cmdInfo->cmdAddr;
+		USART_PrintfFunc("\r\n%s: addr=0x%x \r\n",
+						v_pCmdName,
+						(void*)v_cmdInfo->cmdAddr);
+
+		fnRet = fn(0,0,0,0,0);
+		USART_PrintfFunc("ret=0x%x=%d\r\n",fnRet,fnRet);
+
+	}
+	
+	return;
+}
+
+
+
 void SHELL_ExecOneCmd(char *v_pCmdName, u8 v_cmdLen)
 {
 	s32 cmdIndex = 0;
-	s32 fnRet = 0; 
-	SHELL_FUN fn = NULL;
+	SHELL_CMD_S cmdInfo;
 	
 
 	//len==1: maybe an enter  
@@ -174,29 +225,8 @@ void SHELL_ExecOneCmd(char *v_pCmdName, u8 v_cmdLen)
 	cmdIndex = SHELL_GetAddrByName(v_pCmdName);
 	if (0 <= cmdIndex)
 	{
-		
-		//USART_PrintfFunc("%d %d\r\n",cmdIndex,*(u32*)(symTbl[cmdIndex].addr));
-		if (TRUE == SHELL_cmdIsGlobalValue(&symTbl[cmdIndex]))
-		{
-			USART_PrintfFunc("\r\n%s: addr=0x%x value=0x%x\r\n",
-							v_pCmdName,
-							(void*)symTbl[cmdIndex].addr,
-							*(u32*)(symTbl[cmdIndex].addr));
-		}
-		else if (TRUE == SHELL_cmdIsFunction(&symTbl[cmdIndex]))
-		{
-			fn = (SHELL_FUN)symTbl[cmdIndex].addr;
-			USART_PrintfFunc("\r\n%s: addr=0x%x \r\n",
-							v_pCmdName,
-							(void*)symTbl[cmdIndex].addr);
-
-			fnRet = fn(0,0,0,0,0);
-			USART_PrintfFunc("ret=0x%x=%d\r\n",fnRet,fnRet);
-		}
-		else
-		{
-			USART_PrintfFunc("\r\n%s is what?\r\n",v_pCmdName);
-		}
+		SHELL_CmdParse((u32)cmdIndex,&cmdInfo);
+		SHELL_CmdExec(v_pCmdName,&cmdInfo);
 	
 	}
 	else

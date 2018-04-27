@@ -5,6 +5,14 @@
 #define SHELL_CMD_MAX_PARA_NUM 5
 #define SHELL_CMD_MAX_PARA_LENGTH 10
 
+typedef enum enSHELL_CMD_TYPE
+{
+	SHELL_CMD_GLOBAL_VALUE = 0,
+	SHELL_CMD_FUNCTION,
+	SHELL_CMD_UNKNOWN
+}SHELL_CMD_TYPE_E;
+
+
 typedef s32(*SHELL_FUN)(u32 v_p0, u32 v_p1, u32 v_p2, u32 v_p3, u32 v_p4); 
 
 typedef struct stSHELL_CMD
