@@ -10,7 +10,7 @@
 #include "os_api.h"
 #include "config.h"
 #include "list_api.h"
-#include "shell.h"
+#include "shell_api.h"
 
 OS_SCHEDULE_CTRL_S g_osScheduleCtrl;
 

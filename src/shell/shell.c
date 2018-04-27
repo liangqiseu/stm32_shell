@@ -4,6 +4,7 @@
 #include "print.h"
 #include "config.h"
 #include "shell.h"
+#include "shell_api.h"
 #include "usart.h"
 #include "symbol_api.h"
 #include "os_api.h"
@@ -133,18 +134,18 @@ u8 SHELL_GetOneCmd(char *v_pCmd)
 		
 	if (TRUE == revDoneFlag)
 	{
-		if ('\0' == oneCmd[0])
-		{
-			USART_PrintfFunc("%s\r\n",oneCmd);
-			USART_PrintfFunc(SHELL_PROMPT);
-		}
-		else
-		{
+	//	if ('\0' == oneCmd[0])
+	//	{
+//			USART_PrintfFunc("%s\r\n",oneCmd);
+//			USART_PrintfFunc(SHELL_PROMPT);
+//		}
+//		else
+//		{
 			//USART_PrintfFunc("\r\n%s\r\n",oneCmd);
 			(void)strcpy(v_pCmd,oneCmd);
-		}
+//		}
 
-		retLength = cnt - 1;
+		retLength = cnt;
 		cnt = 0;
 		revDoneFlag = FALSE;
 		
@@ -154,11 +155,22 @@ u8 SHELL_GetOneCmd(char *v_pCmd)
 }
 
 
-void SHELL_ExecOneCmd(char *v_pCmdName)
+void SHELL_ExecOneCmd(char *v_pCmdName, u8 v_cmdLen)
 {
 	s32 cmdIndex = 0;
+	s32 fnRet = 0; 
+	SHELL_FUN fn = NULL;
 	
-	USART_PrintfFunc("%s\r\n",v_pCmdName);
+
+	//len==1: maybe an enter  
+	if ((1 == v_cmdLen))
+	{
+		USART_PrintfFunc("%s\r\n",v_pCmdName);
+		return;
+	}
+
+	
+	//USART_PrintfFunc("%s\r\n",v_pCmdName);
 	cmdIndex = SHELL_GetAddrByName(v_pCmdName);
 	if (0 <= cmdIndex)
 	{
@@ -166,29 +178,33 @@ void SHELL_ExecOneCmd(char *v_pCmdName)
 		//USART_PrintfFunc("%d %d\r\n",cmdIndex,*(u32*)(symTbl[cmdIndex].addr));
 		if (TRUE == SHELL_cmdIsGlobalValue(&symTbl[cmdIndex]))
 		{
-			USART_PrintfFunc("%s: addr=0x%x value=0x%x\r\n",
+			USART_PrintfFunc("\r\n%s: addr=0x%x value=0x%x\r\n",
 							v_pCmdName,
 							(void*)symTbl[cmdIndex].addr,
 							*(u32*)(symTbl[cmdIndex].addr));
 		}
 		else if (TRUE == SHELL_cmdIsFunction(&symTbl[cmdIndex]))
 		{
-			USART_PrintfFunc("%s: addr=0x%x \r\n",
+			fn = (SHELL_FUN)symTbl[cmdIndex].addr;
+			USART_PrintfFunc("\r\n%s: addr=0x%x \r\n",
 							v_pCmdName,
 							(void*)symTbl[cmdIndex].addr);
+
+			fnRet = fn(0,0,0,0,0);
+			USART_PrintfFunc("ret=0x%x=%d\r\n",fnRet,fnRet);
 		}
 		else
 		{
-			USART_PrintfFunc("%s\r\n",v_pCmdName);
+			USART_PrintfFunc("\r\n%s is what?\r\n",v_pCmdName);
 		}
 	
 	}
 	else
 	{
-		USART_PrintfFunc("%s is not a valid cmd!\r\n",v_pCmdName);
+		USART_PrintfFunc("\r\n%s is not a valid cmd!\r\n",v_pCmdName);
 	}
 
-	USART_PrintfFunc(SHELL_PROMPT); 
+
 
 	return;
 } 
@@ -200,17 +216,25 @@ void SHELL_ExecOneCmd(char *v_pCmdName)
 */
 void SHELL_CmdHandle(void)
 {
+	u8 len = 0;
 	char oneCmd[SHELL_CMD_CHAR_MAX] = { 0 };
 
-	if (0 == SHELL_GetOneCmd(oneCmd))
+	len = SHELL_GetOneCmd(oneCmd);
+	if (0 == len)
 	{
 		return;
 	}
-	else
-	{
-		//USART_PrintfFunc("%s\r\n",oneCmd);
-		SHELL_ExecOneCmd(oneCmd);
-	}
+
+	SHELL_ExecOneCmd(oneCmd,len);
+
+	USART_PrintfFunc(SHELL_PROMPT); 
 	return;
+}
+
+
+s32 SHELL_Test(void)
+{
+	USART_PrintfFunc("SHELL_Test OK!\r\n");
+	return (-19);
 }
 

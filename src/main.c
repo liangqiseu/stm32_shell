@@ -5,7 +5,6 @@
 #include "print.h"
 #include "os_api.h"
 #include "config.h"
-#include "shell.h"
 
 /*
 OS_TASK_RETURN_E OS_PrintTask(void)
