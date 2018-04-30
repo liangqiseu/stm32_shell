@@ -15,18 +15,29 @@ proc buildSymTcl::creatSymTcl {} {
 	set symbolInfoList [split $symbolInfoRaw \n]
 	#puts $buildSymTcl::fdOut $symbolInfoList
 	set symTblList {}
-	
+
+	set idx 1	
 	foreach symbolEntry $symbolInfoList {
-		
+	#	set idx [expr $idx + 1]
+	#	puts $buildSymTcl::fdOut "$symbolEntry"
+
 		#function name with . is illegal in c file
 		if [regexp {^.*\.} $symbolEntry] {
 			continue
 		}
 		
-		if [regexp {^(.*) (.*) (.*) (.*)} $symbolEntry total addr size type name] {
-		#	puts $buildSymTcl::fdOut "$total || $addr || $size || $type || $name"
+		if [regexp {^(.*) (.*)} $symbolEntry total type name] {
+	#		puts $buildSymTcl::fdOut "$total || $type || $name"
 		}
 
+		if [regexp {^(.*) (.*) (.*)} $symbolEntry total addr type name] {
+	#		puts $buildSymTcl::fdOut "$total || $addr || $type || $name"
+		}
+
+		if [regexp {^(.*) (.*) (.*) (.*)} $symbolEntry total addr size type name] {
+	#		puts $buildSymTcl::fdOut "$total || $addr || $size || $type || $name"
+		}
+	
 		if [regexp {^_(.*)} $name] {
 			continue
 		} 
@@ -47,7 +58,7 @@ proc buildSymTcl::creatSymTcl {} {
 		#puts $buildSymTcl::fdOut "$total || $addr || $size || $type || $name"
 
 		switch -glob $type {
-			[DR] {
+			[D] {
 				puts $buildSymTcl::fdOut "extern int $name;"
 				lappend symTblList "	\{\
 									0,\
@@ -58,8 +69,30 @@ proc buildSymTcl::creatSymTcl {} {
 									\},"
 			}
 
+
+			[R] {
+				puts $buildSymTcl::fdOut "extern int $name;"
+				lappend symTblList "	\{\
+									0,\
+									\"$name\",\
+									(char*)\&$name,\
+									0x$size,0,0,\
+									SYMBOL_GLOBAL | SYMBOL_DATA\
+									\},"
+			}
 			
-			[BC] {
+			[B] {
+				puts $buildSymTcl::fdOut "extern int $name;"
+				lappend symTblList "	\{\
+									0,\
+									\"$name\",\
+									(char*)\&$name, \
+									0x$size,0,0,\
+									SYMBOL_GLOBAL | SYMBOL_BSS\
+									\},"
+			}
+	
+			[C] {
 				puts $buildSymTcl::fdOut "extern int $name;"
 				lappend symTblList "	\{\
 									0,\
@@ -98,7 +131,7 @@ proc buildSymTcl::creatSymTcl {} {
 
 
 			default {
-				continue
+			#	continue
 			}
 
 
