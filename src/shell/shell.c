@@ -28,12 +28,14 @@ s32 SHELL_GetAddrByName(const char *v_pName)
 	u32 left = 0;
 	u32 right = g_symTblLen - 1;
 	u32 mid = 0;	
-	s8 cmpResult = 0;
+	int cmpResult = 0;
 
 	while (left <= right)
 	{
 		mid = left + (right - left) / 2;
 		cmpResult = strcmp(v_pName,symTbl[mid].name);
+
+//		USART_PrintfFunc("%d %d %d %d\r\n",mid,left,right,cmpResult);
 		if (0 > cmpResult)
 		{
 			right = mid - 1;
@@ -134,16 +136,7 @@ u8 SHELL_GetOneCmd(char *v_pCmd)
 		
 	if (TRUE == revDoneFlag)
 	{
-	//	if ('\0' == oneCmd[0])
-	//	{
-//			USART_PrintfFunc("%s\r\n",oneCmd);
-//			USART_PrintfFunc(SHELL_PROMPT);
-//		}
-//		else
-//		{
-			//USART_PrintfFunc("\r\n%s\r\n",oneCmd);
-			(void)strcpy(v_pCmd,oneCmd);
-//		}
+		(void)strcpy(v_pCmd,oneCmd);
 
 		retLength = cnt;
 		cnt = 0;

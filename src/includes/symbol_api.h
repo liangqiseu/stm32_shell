@@ -16,7 +16,6 @@ typedef struct tagSHELL_NODE
 
 typedef struct tagSYMBOL_TABAL
 {
-	SHELL_NODE_S magicNum;
 	char* name;
 	void *addr;
 	unsigned int size;

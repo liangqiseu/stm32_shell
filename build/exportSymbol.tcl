@@ -16,7 +16,7 @@ proc buildSymTcl::creatSymTcl {} {
 	#puts $buildSymTcl::fdOut $symbolInfoList
 	set symTblList {}
 
-	set idx 1	
+	set idx 0	
 	foreach symbolEntry $symbolInfoList {
 	#	set idx [expr $idx + 1]
 	#	puts $buildSymTcl::fdOut "$symbolEntry"
@@ -61,71 +61,72 @@ proc buildSymTcl::creatSymTcl {} {
 			[D] {
 				puts $buildSymTcl::fdOut "extern int $name;"
 				lappend symTblList "	\{\
-									0,\
 									\"$name\",\
 									(char*)\&$name,\
 									0x$size,0,0,\
 									SYMBOL_GLOBAL | SYMBOL_DATA\
 									\},"
+		
 			}
 
 
 			[R] {
 				puts $buildSymTcl::fdOut "extern int $name;"
 				lappend symTblList "	\{\
-									0,\
 									\"$name\",\
 									(char*)\&$name,\
 									0x$size,0,0,\
 									SYMBOL_GLOBAL | SYMBOL_DATA\
 									\},"
+
 			}
 			
 			[B] {
 				puts $buildSymTcl::fdOut "extern int $name;"
 				lappend symTblList "	\{\
-									0,\
 									\"$name\",\
 									(char*)\&$name, \
 									0x$size,0,0,\
 									SYMBOL_GLOBAL | SYMBOL_BSS\
 									\},"
+
 			}
 	
 			[C] {
 				puts $buildSymTcl::fdOut "extern int $name;"
 				lappend symTblList "	\{\
-									0,\
 									\"$name\",\
 									(char*)\&$name, \
 									0x$size,0,0,\
 									SYMBOL_GLOBAL | SYMBOL_BSS\
 									\},"
+
 			}
 
 			[A] {
 				puts $buildSymTcl::fdOut "extern int $name;"
 				lappend symTblList "	\{\
-									0,\
 									\"$name\",\
 									(char*)\&$name,\
 									0x$size,0,0,\
 									SYMBOL_GLOBAL | SYMBOL_ABS\
 									\},"
+
 			}
 
 			[TVW] {		
 				if [regexp {^[A-Z]*_.*} $name] {
 					puts $buildSymTcl::fdOut "extern int $name ();"
 					lappend symTblList "	\{\
-										0,\
 										\"$name\",\
 										(char*)$name,\
 										0x$size,0,0,\
 										SYMBOL_GLOBAL | SYMBOL_TEXT\
 										\},"
-	
+
+				
 				}	
+
 			}
 
 
