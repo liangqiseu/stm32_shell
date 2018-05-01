@@ -1,6 +1,6 @@
-#include "delay.h"
-static u8  fac_us=0;//us延时倍乘数			   
-static u16 fac_ms=0;//ms延时倍乘数,在ucos下,代表每个节拍的ms数
+#include "delay_api.h"
+static u8  fac_us=0;  
+static u16 fac_ms=0;
 
 			   
 void SYS_DelayInit(u8 v_sysclk)

@@ -1,7 +1,7 @@
 #ifndef __SYS_H
 #define __SYS_H	  
 #include <stm32f10x.h>   
-#include "config.h"
+#include "config_api.h"
 
 
 #define SYSTEM_SUPPORT_UCOS		0		

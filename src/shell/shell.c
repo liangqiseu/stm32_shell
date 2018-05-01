@@ -1,13 +1,14 @@
 /* std lib*/
 #include <string.h>
 
-#include "print.h"
-#include "config.h"
-#include "shell.h"
+#include "print_api.h"
+#include "config_api.h"
 #include "shell_api.h"
-#include "usart.h"
+#include "prph_api.h"
 #include "symbol_api.h"
 #include "os_api.h"
+
+#include "shell.h"
 
 #define SHELL_CMD_CHAR_MAX 50
 #define SHELL_PROMPT "XiaoOS# "

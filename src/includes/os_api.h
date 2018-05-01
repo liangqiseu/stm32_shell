@@ -5,7 +5,7 @@
 #ifndef OS_API_H
 #define OS_API_H
 
-#include "config.h"
+#include "config_api.h"
 
 #define OS_OK 0
 #define OS_ERR 1

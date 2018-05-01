@@ -5,10 +5,10 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include <string.h>
+#include<string.h>
 
 #include "os_api.h"
-#include "config.h"
+#include "config_api.h"
 #include "list_api.h"
 #include "shell_api.h"
 

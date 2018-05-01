@@ -1,5 +1,5 @@
-#ifndef __DELAY_H
-#define __DELAY_H 			   
+#ifndef __DELAY_API_H_
+#define __DELAY_API_H_ 			   
 #include "sys.h"  
 
 void SYS_DelayInit(u8 v_sysclk);

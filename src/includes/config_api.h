@@ -1,11 +1,10 @@
 /************************************************************************/
-/* name:config.h                                                        */
+/* name:config_api.h                                                        */
 /* create data:2017/8/15                                                */
 /************************************************************************/
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#include <stdint.h>
 
 
 /*!< STM32F10x Standard Peripheral Library old types (maintained for legacy purpose) */
