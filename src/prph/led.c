@@ -1,6 +1,11 @@
 #include "sys.h"   
 #include "prph_api.h"
 
+
+
+/*
+ *  copy form miniSTM devolpment board code
+ * */
 void LED_Init(void)
 {
     RCC->APB2ENR|=1<<2;    	   	 
